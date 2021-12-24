@@ -27,7 +27,7 @@ fn f1(p: &Parent) {
 }
 
 fn f2(p: &mut Parent) {
-    p.0 *= -1;
+    p.0 += 10;
 }
 
 fn main() {
@@ -42,5 +42,5 @@ fn main() {
     let mut p3 = Parent(1, Child(11), Child(12));
     f1(&p3); // p3は借用される
     f2(&mut p3); // p3は借用される
-    println!("p3: {:?}", p3); // p3は所有権を失っていないので、
+    println!("p3: {:?}", p3); // p3は所有権を失っていないので、アクセス可能
 }
