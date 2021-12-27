@@ -1,7 +1,7 @@
 use toy_vec::ToyVec;
 
 fn main() {
-    let mut v = ToyVec::new();
+    let mut v = ToyVec::<String>::new();
     v.push("Java Finch".to_string());
     v.push("Budgerigar".to_string());
     let e = v.get(1);
