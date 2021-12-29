@@ -64,6 +64,27 @@ impl<T: Default> ToyVec<T> {
         }
     }
 
+    // 関数の戻り値型が参照型のとき、コンパイラは以下の規則に基づいて「ライフタイムの省略」を試みる
+    // 1. 引数のうち、参照型が1つだけなら、その引数から借用する
+    // 2. 第1引数が&self、&mut selfなら、他に参照型の引数があっても、selfから借用する
+    // 3. 上記以外の場合はライフタイムを省略できない
+    // get_or関数では、3に該当するため、指定する必要がある
+    // デフォルトでは"get_or<'a, 'b>(&'a self, index: usize, default: &'b T) -> &'a T"と推論され、
+    // 戻り値は'aを期待するがdefautlは'bとなり、ライフタイムが一致しないのでエラー
+    // 以下のようにライフタイムを同一にすると、戻り値が有効な間はselfとdefaultの両方が借用中となる
+    pub fn get_or<'a>(&'a self, index: usize, default: &'a T) -> &'a T {
+        match self.get(index) {
+            Some(v) => v,
+            None => default,
+        }
+    }
+
+    // whereを使ってライフタイムを指定することもできる
+    // pub fn get_or<'a, 'b>(&'a self, index: usize, default: &'b T) -> &'a T 
+    // where
+    //     'b: 'a // 'b は'aよりライフタイムが長い
+    // {}
+
     fn grow(&mut self) {
 
     }
