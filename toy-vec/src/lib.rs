@@ -54,8 +54,8 @@ impl<T: Default> ToyVec<T> {
     }
 
     // &selfを取るので、ToyVecの内容は変更されない
-    // Option<&T>を返すので、selfが所有する値の不変の参照を返却する
     // indexはusize型なので、コピーされる
+    // Option<&T>を返すので、selfが所有する値の不変の参照を返却する
     pub fn get(&self, index: usize) -> Option<&T> {
         if index < self.len {
             Some(&self.elements[index])
