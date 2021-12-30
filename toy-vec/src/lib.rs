@@ -86,7 +86,21 @@ impl<T: Default> ToyVec<T> {
     // {}
 
     fn grow(&mut self) {
-
+        if self.capacity() == 0 {
+            self.elements = Self::allocate_in_heap(1);
+        } else {
+            // 2倍の領域を確保
+            let new_elements = Self::allocate_in_heap(self.capacity() * 2);
+            // 引数が&mut selfなので、self.elementsの所有権を奪えないので置換する
+            let old_elements = std::mem::replace(&mut self.elements, new_elements);
+            // Vec<T>のinto_iter(self)なら要素の所有権を得られる
+            for (i, elem) in old_elements.into_vec().into_iter().enumerate() {
+            // Box<[T]>.into_iter()だと型強制により&[T]または&mut [T]のinto_iter()となり、
+            // &Tもしくは&mut Tが返却されるので、所有権を奪えない
+                // old_elementsの要素をnew_elementsへムーブ
+                self.elements[i] = elem;
+            }
+        }
     }
 
     // 戻り値が参照ではないので、所有権ごと返す
