@@ -88,4 +88,20 @@ impl<T: Default> ToyVec<T> {
     fn grow(&mut self) {
 
     }
+
+    // 戻り値が参照ではないので、所有権ごと返す
+    pub fn pop(&mut self) -> Option<T> {
+        if self.len == 0 {
+            None
+        } else {
+            self.len -= 1;
+            // &mut selfでToyVec（elements）を借用しているので、
+            // 以下のコードは借用の文脈で値がムーブアウトしていることになる
+            // 借用経由では値の所有権を一方的に奪うことはできないのでエラー
+            // let elem = self.elements[self.len]; 
+            // 以下のように値を変わりの値と交換することで解決（replaceの戻り値は置換前の値）
+            let elem = std::mem::replace(&mut self.elements[self.len], Default::default());
+            Some(elem)
+        }
+    }
 }
