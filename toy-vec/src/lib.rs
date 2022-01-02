@@ -97,7 +97,7 @@ impl<T: Default> ToyVec<T> {
             for (i, elem) in old_elements.into_vec().into_iter().enumerate() {
             // Box<[T]>.into_iter()だと型強制により&[T]または&mut [T]のinto_iter()となり、
             // &Tもしくは&mut Tが返却されるので、所有権を奪えない
-                // old_elementsの要素をnew_elementsへムーブ
+            // old_elementsの要素をnew_elementsへムーブ
                 self.elements[i] = elem;
             }
         }
