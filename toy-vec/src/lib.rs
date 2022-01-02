@@ -109,4 +109,37 @@ impl<T: Default> ToyVec<T> {
             Some(elem)
         }
     }
+
+    pub fn iter<'vec>(&'vec self) -> Iter<'vec, T> {
+        Iter {
+            elements: &self.elements,
+            len: self.len,
+            pos: 0,
+        }
+    }
+
+}
+
+// 構造体や列挙型では参照のフィールドを保持でき、ライフタイム指定子を付与する必要がある
+// このイテレータ自身またはnext()で得た&'vec T型の値が生存している間はToyVecは変更できない
+pub struct Iter<'vec, T> {
+    elements: &'vec Box<[T]>,
+    len: usize,
+    pos: usize,
+}
+
+// Iteratorトレイトの実装
+impl<'vec, T> Iterator for Iter<'vec, T> {
+    // 関連型（トレイトに関連づいた型）で、このイテレータがいてレートする要素の型を指定する
+    type Item = &'vec T;
+    
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.pos >= self.len {
+            None
+        } else {
+            let res = Some(&self.elements[self.pos]);
+            self.pos += 1;
+            res
+        }
+    }
 }
