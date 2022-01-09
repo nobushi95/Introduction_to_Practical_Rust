@@ -1,5 +1,8 @@
-pub mod coordinates;
-use coordinates::*;
+mod coordinates;
+use coordinates::Coordinates;
+use coordinates::print_point;
+use coordinates::cartesian_coord::CartesianCoord;
+use coordinates::polar_coord::PolarCoord;
 
 trait ConvertTo<Output> {
     fn convert(&self) -> Output;

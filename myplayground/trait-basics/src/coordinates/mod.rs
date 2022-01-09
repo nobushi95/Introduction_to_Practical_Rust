@@ -1,49 +1,13 @@
-#[derive(Debug)]
-pub struct CartesianCoord {
-    pub x: f64,
-    pub y: f64
-}
+pub mod cartesian_coord;
+pub mod polar_coord;
 
-#[derive(Debug)]
-pub struct PolarCoord {
-    pub r: f64,
-    pub theta: f64,
-}
+use cartesian_coord::CartesianCoord;
 
 pub trait Coordinates {
     fn to_cartesian(self) -> CartesianCoord;
     fn from_cartesian(cart: CartesianCoord) -> Self;
 }
 
-// デカルト座標はそのまま
-impl Coordinates for CartesianCoord {
-    fn to_cartesian(self) -> CartesianCoord {
-        self
-    }
-
-    fn from_cartesian(cart: CartesianCoord) -> Self {
-        cart
-    }
-}
-
-// 極座標は変換が必要
-impl Coordinates for PolarCoord {
-    fn to_cartesian(self) -> CartesianCoord {
-        CartesianCoord {
-            x: self.r * self.theta.cos(),
-            y: self.r * self.theta.sin(),
-        }
-    }
-
-    fn from_cartesian(cart: CartesianCoord) -> Self {
-        PolarCoord {
-            r: (cart.x * cart.x + cart.y * cart.y).sqrt(),
-            theta: (cart.y / cart.x).atan(),
-        }
-    }
-}
-
-// タプルにも実装ｄけいる
 impl Coordinates for (f64, f64) {
     fn to_cartesian(self) -> CartesianCoord {
         CartesianCoord {
