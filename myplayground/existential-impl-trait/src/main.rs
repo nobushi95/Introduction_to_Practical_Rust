@@ -42,7 +42,7 @@ fn one() -> impl fmt::Display {
 // }
 
 fn gen_counter_trait_object(init: i32) -> Box<dyn FnMut() -> i32> {
-    let mut n =init;
+    let mut n = init;
     Box::new(move || { // Closure本体にnの所有権を移動する必要がある？
         let ret = n;
         n += 1;
@@ -51,7 +51,7 @@ fn gen_counter_trait_object(init: i32) -> Box<dyn FnMut() -> i32> {
 }
 
 fn gen_counter(init: i32) -> impl FnMut() -> i32 {
-    let mut n = init;
+    let mut n = init; // nはClosureが所有する変数で、initの値はClosureを生成する際に1度使用される飲み
     // 存在impl Traitでトレイトオブジェクトを作る必要がなくなった
     move || {
         let ret = n;
@@ -70,7 +70,7 @@ fn main() {
     assert_eq!(g(), init + 2);
     assert_eq!(g(), init + 3);
     assert_eq!(g(), init + 4);
-    
+
     let init = 20;
     g = gen_counter(init);
     assert_eq!(g(), init);
