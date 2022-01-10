@@ -1,4 +1,5 @@
 use super::Coordinates;
+use crate::linear_transform::LinearTransform;
 
 #[derive(Debug)]
 pub struct CartesianCoord {
@@ -16,3 +17,6 @@ impl Coordinates for CartesianCoord {
         cart
     }
 }
+
+// LinearTransformトレイトが継承するCoordinatesトレイトをCartesianCoordは実装しているので、LinearTransformを実装できる
+impl LinearTransform for CartesianCoord {}

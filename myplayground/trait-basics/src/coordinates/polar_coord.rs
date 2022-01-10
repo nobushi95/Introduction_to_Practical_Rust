@@ -1,6 +1,8 @@
 use super::Coordinates;
 use super::cartesian_coord::CartesianCoord;
 
+use crate::linear_transform::LinearTransform;
+
 #[derive(Debug)]
 pub struct PolarCoord {
     pub r: f64,
@@ -21,5 +23,16 @@ impl Coordinates for PolarCoord {
             r: (cart.x * cart.x + cart.y * cart.y).sqrt(),
             theta: (cart.y / cart.x).atan(),
         }
+    }
+}
+
+impl LinearTransform for PolarCoord {
+    // デフォルト実装をオーバーロード
+    // selfとmut selfのみシグニチャが変わっても良さそう？？
+    // selfとmut selfはどちらも所有権がこちらに移動するので大丈夫？
+    // selfと&selfや&selfと&mut selfの変更はエラーとなる
+    fn rotate(mut self, theta: f64) -> Self {
+        self.theta += theta;
+        self
     }
 }

@@ -1,8 +1,10 @@
 mod coordinates;
 use coordinates::Coordinates;
 use coordinates::print_point;
-use coordinates::cartesian_coord::CartesianCoord;
 use coordinates::polar_coord::PolarCoord;
+
+mod linear_transform;
+use linear_transform::LinearTransform;
 
 trait ConvertTo<Output> {
     fn convert(&self) -> Output;
@@ -27,5 +29,8 @@ fn main() {
     print_point(PolarCoord {
         r: 1.0,
         theta: std::f64::consts::PI / 2.0,
-    })
+    });
+
+    let p = (1.0, 0.0).to_cartesian();
+    print_point(p.rotate(std::f64::consts::PI));
 }
