@@ -33,7 +33,7 @@ impl Trait for StrB {
 }
 
 // 関連型: トレイトにのみ使用できる機能で、トレイトに関連づいた型を定義できる
-use std::{str::FromStr, ops::Generator};
+use std::str::FromStr;
 
 trait Server {
     // type 型名 で宣言できる
