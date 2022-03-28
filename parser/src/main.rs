@@ -68,6 +68,26 @@ impl Token {
         Self::new(TokenKind::RParen, loc)
     }
 }
+
+/// 字句解析エラー
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum LexErrorKind {
+    InvalidChar(char),
+    Eof,
+}
+
+// 字句解析エラーアノテーション
+type LexError = Annot<LexErrorKind>;
+
+impl LexError {
+    fn invalid_char(c: char, loc: Loc) -> Self {
+        Self::new(LexErrorKind::InvalidChar(c), loc)
+    }
+    fn eof(loc: Loc) -> Self {
+        Self::new(LexErrorKind::Eof, loc)
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 }
