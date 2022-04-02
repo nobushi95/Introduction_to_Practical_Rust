@@ -215,6 +215,29 @@ fn test_lexer() {
     )
 }
 
+use std::io;
+fn prompt(s: &str) -> io::Result<()> {
+    use std::io::{stdout, Write};
+    let stdout = stdout();
+    let mut stdout = stdout.lock();
+    stdout.write(s.as_bytes())?;
+    stdout.flush()
+}
+
 fn main() {
-    println!("Hello, world!");
+    use std::io::{stdin, BufRead, BufReader};
+    let stdin = stdin();
+    let stdin = stdin.lock();
+    let mut lines = stdin.lines();
+
+    loop {
+        prompt("> ").unwrap();
+        // ユーザーの入力受付
+        if let Some(Ok(line)) = lines.next() {
+            let token = lex(&line);
+            println!("{:?}", token);
+        } else {
+            break;
+        }
+    }
 }
