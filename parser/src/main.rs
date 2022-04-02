@@ -88,6 +88,133 @@ impl LexError {
     }
 }
 
+/// 字句解析器
+fn lex(input: &str) -> Result<Vec<Token>, LexError> {
+    let mut tokens = Vec::new();
+    let input = input.as_bytes();
+    let mut pos = 0;
+
+    // サブレキサを読んだあとにposを更新する
+    macro_rules! lex_a_token {
+        ($lexer:expr) => {{
+            let (tok, p) = $lexer?;
+            tokens.push(tok);
+            pos = p;
+        }};
+    }
+
+    while pos < input.len() {
+        match input[pos] {
+            b'0'..=b'9' => lex_a_token!(lex_number(input, pos)),
+            b'+' => lex_a_token!(lex_plus(input, pos)),
+            b'-' => lex_a_token!(lex_minus(input, pos)),
+            b'*' => lex_a_token!(lex_asterisk(input, pos)),
+            b'/' => lex_a_token!(lex_slash(input, pos)),
+            b'(' => lex_a_token!(lex_lparen(input, pos)),
+            b')' => lex_a_token!(lex_rparen(input, pos)),
+            // 空白の場合
+            b' ' | b'\t' | b'\n' => {
+                let ((), p) = skip_space(input, pos);
+                pos = p;
+            }
+            // それ以外はエラー
+            b => return Err(LexError::invalid_char(b as char, Loc(pos, pos + 1))),
+        }
+    }
+    Ok(tokens)
+}
+
+/// posの場所のバイトが期待のものか判定し、期待のものであれば１バイト消費してposを1すすめる
+fn consume_byte(input: &[u8], pos: usize, b: u8) -> Result<(u8, usize), LexError> {
+    // 1バイト消費したいが入力が終わっているのでエラー
+    if input.len() <= pos {
+        return Err(LexError::eof(Loc(pos, pos)));
+    }
+
+    // 入力が期待のものでないのでエラー
+    if input[pos] != b {
+        return Err(LexError::invalid_char(
+            input[pos] as char,
+            Loc(pos, pos + 1),
+        ));
+    }
+
+    Ok((b, pos + 1))
+}
+
+fn lex_plus(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    // match consume_byte(input, start, b'+') {
+    //     Ok((_, end)) => Ok((Token::plus(Loc(start, end)), end)),
+    //     Err(err) => Err(err),
+    // }
+    // 上記と同様の記述を以下のResult::map（Reuslt<T, E> -> Result<U, E>）を用いて１行で記述できる
+    consume_byte(input, start, b'+').map(|(_, end)| (Token::plus(Loc(start, end)), end))
+}
+
+fn lex_minus(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'-').map(|(_, end)| (Token::minus(Loc(start, end)), end))
+}
+
+fn lex_asterisk(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'*').map(|(_, end)| (Token::asterisk(Loc(start, end)), end))
+}
+
+fn lex_slash(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'/').map(|(_, end)| (Token::slash(Loc(start, end)), end))
+}
+
+fn lex_lparen(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'(').map(|(_, end)| (Token::lparen(Loc(start, end)), end))
+}
+
+fn lex_rparen(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b')').map(|(_, end)| (Token::rparen(Loc(start, end)), end))
+}
+
+fn lex_number(input: &[u8], pos: usize) -> Result<(Token, usize), LexError> {
+    use std::str::from_utf8;
+    let start = pos;
+    let end = recognize_many(input, start, |b| b"0123456789".contains(&b));
+
+    // 数字の文字列を数値に変換する
+    let n = from_utf8(&input[start..end])
+        .unwrap() // start..endまでの間は数字が続くのでunwrapしても安全
+        .parse()
+        .unwrap(); // from_utf8は常に成功するためunwrapしても安全
+    Ok((Token::number(n, Loc(start, end)), end))
+}
+
+/// 入力に空白文字が続く限りposをすすめる
+fn skip_space(input: &[u8], pos: usize) -> ((), usize) {
+    let pos = recognize_many(input, pos, |b| b" \n\t".contains(&b));
+    ((), pos)
+}
+
+/// 条件に当てはまる間、posをすすめる
+fn recognize_many(input: &[u8], mut pos: usize, mut f: impl FnMut(u8) -> bool) -> usize {
+    while pos < input.len() && f(input[pos]) {
+        pos += 1;
+    }
+    pos
+}
+
+#[test]
+fn test_lexer() {
+    assert_eq!(
+        lex("1 + 2 * 3 - -10"),
+        Ok(vec![
+            Token::number(1, Loc(0, 1)),
+            Token::plus(Loc(2, 3)),
+            Token::number(2, Loc(4, 5)),
+            Token::asterisk(Loc(6, 7)),
+            Token::number(3, Loc(8, 9)),
+            Token::minus(Loc(10, 11)),
+            Token::minus(Loc(12, 13)),
+            Token::number(10, Loc(13, 15)),
+        ])
+    )
+}
+
 fn main() {
     println!("Hello, world!");
 }
