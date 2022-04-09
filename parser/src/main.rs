@@ -282,7 +282,7 @@ impl BinOp {
 
 /// 構文解析エラー
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum ParserError {
+enum ParseError {
     /// 予期しないトークン
     UnexpectedToken(Token),
     /// 式を期待したが式でないものが来た
