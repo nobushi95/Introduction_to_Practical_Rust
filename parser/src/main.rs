@@ -314,7 +314,21 @@ fn test_lexer() {
     )
 }
 
-use std::io;
+fn parse(tokens: Vec<Token>) -> Result<Ast, ParseError> {
+    let mut tokens = tokens.into_iter().peekable();
+    let ret = parse_expr(&mut tokens)?;
+    match tokens.next() {
+        Some(tok) => Err(ParseError::ReduntExpressiont(tok)),
+        None => Ok(ret),
+    }
+}
+
+fn parse_expr<Tokens>(tokens: &mut Peekable<Tokens>) -> Result<Ast, ParseError>
+where
+    Tokens: Iterator<Item = Token>,
+{
+    todo!();
+}
 fn prompt(s: &str) -> io::Result<()> {
     use std::io::{stdout, Write};
     let stdout = stdout();
