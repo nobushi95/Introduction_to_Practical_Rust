@@ -335,7 +335,42 @@ fn parse_expr3<Tokens>(tokens: &mut Peekable<Tokens>) -> Result<Ast, ParseError>
 where
     Tokens: Iterator<Item = Token>,
 {
-    todo!();
+    // EXPR2をパースする
+    let mut e = parse_expr2(tokens)?;
+    // EXPRR3_Loop
+    loop {
+        match tokens.peek().map(|tok| tok.value) {
+            // ("+" | "-")
+            Some(TokenKind::Plus) | Some(TokenKind::Minus) => {
+                // ("+" | "-")をパース
+                let op = match tokens.next().unwrap() {
+                    Token {
+                        value: TokenKind::Plus,
+                        loc,
+                    } => BinOp::add(loc),
+                    Token {
+                        value: TokenKind::Minus,
+                        loc,
+                    } => BinOp::sub(loc),
+                    // "+"か"-"であることは確認したのでそれ以外はありえない
+                    _ => unreachable!(),
+                };
+                // EXPR2をパース
+                let r = parse_expr2(tokens)?;
+                let loc = e.loc.merge(&r.loc);
+                e = Ast::binop(op, e, r, loc);
+            }
+            // ε
+            _ => return Ok(e),
+        }
+    }
+}
+
+fn parse_expr2<Tokens>(tokens: &mut Peekable<Tokens>) -> Result<Ast, ParseError>
+where
+    Tokens: Iterator<Item = Token>,
+{
+    todo!()
 }
 
 use std::io;
