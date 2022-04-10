@@ -323,6 +323,7 @@ fn parse(tokens: Vec<Token>) -> Result<Ast, ParseError> {
     }
 }
 
+use std::iter::Peekable;
 fn parse_expr<Tokens>(tokens: &mut Peekable<Tokens>) -> Result<Ast, ParseError>
 where
     Tokens: Iterator<Item = Token>,
@@ -336,6 +337,8 @@ where
 {
     todo!();
 }
+
+use std::io;
 fn prompt(s: &str) -> io::Result<()> {
     use std::io::{stdout, Write};
     let stdout = stdout();
