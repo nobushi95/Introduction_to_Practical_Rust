@@ -275,7 +275,7 @@ impl BinOp {
     fn mult(loc: Loc) -> Self {
         Self::new(BinOpKind::Mult, loc)
     }
-    fn dib(loc: Loc) -> Self {
+    fn div(loc: Loc) -> Self {
         Self::new(BinOpKind::Div, loc)
     }
 }
@@ -367,6 +367,34 @@ where
 }
 
 fn parse_expr2<Tokens>(tokens: &mut Peekable<Tokens>) -> Result<Ast, ParseError>
+where
+    Tokens: Iterator<Item = Token>,
+{
+    let mut e = parse_expr1(tokens)?;
+    loop {
+        match tokens.peek().map(|tok| tok.value) {
+            Some(TokenKind::Asterisk) | Some(TokenKind::Slash) => {
+                let op = match tokens.next().unwrap() {
+                    Token {
+                        value: TokenKind::Asterisk,
+                        loc,
+                    } => BinOp::mult(loc),
+                    Token {
+                        value: TokenKind::Slash,
+                        loc,
+                    } => BinOp::div(loc),
+                    _ => unreachable!(),
+                };
+                let r = parse_expr1(tokens)?;
+                let loc = e.loc.merge(&r.loc);
+                e = Ast::binop(op, e, r, loc);
+            }
+            _ => return Ok(e),
+        }
+    }
+}
+
+fn parse_expr1<Tokens>(tokens: &mut Peekable<Tokens>) -> Result<Ast, ParseError>
 where
     Tokens: Iterator<Item = Token>,
 {
