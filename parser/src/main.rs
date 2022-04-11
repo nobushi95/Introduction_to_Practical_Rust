@@ -394,6 +394,33 @@ where
     }
 }
 
+fn parse_left_binop<Tokens>(
+    tokens: &mut Peekable<Tokens>,
+    subexpr_parser: fn(&mut Peekable<Tokens>) -> Result<Ast, ParseError>,
+    op_parser: fn(&mut Peekable<Tokens>) -> Result<BinOp, ParseError>,
+) -> Result<Ast, ParseError>
+where
+    Tokens: Iterator<Item = Token>,
+{
+    let mut e = subexpr_parser(tokens)?;
+    loop {
+        match tokens.peek() {
+            Some(_) => {
+                let op = match op_parser(tokens) {
+                    Ok(op) => op,
+                    // ここでパースに失敗するとこれ以上中間演算子がないという意味
+                    Err(_) => break,
+                };
+                let r = subexpr_parser(tokens)?;
+                let loc = e.loc.merge(&r.loc);
+                e = Ast::binop(op, e, r, loc);
+            }
+            _ => break,
+        }
+    }
+    Ok(e)
+}
+
 fn parse_expr1<Tokens>(tokens: &mut Peekable<Tokens>) -> Result<Ast, ParseError>
 where
     Tokens: Iterator<Item = Token>,
