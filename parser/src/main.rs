@@ -439,7 +439,26 @@ fn parse_atom<Tokens>(tokens: &mut Peekable<Tokens>) -> Result<Ast, ParseError>
 where
     Tokens: Iterator<Item = Token>,
 {
-    todo!()
+    tokens
+        .next()
+        .ok_or(ParseError::Eof)
+        .and_then(|tok| match tok.value {
+            // UNUMBER
+            TokenKind::Number(n) => Ok(Ast::new(AstKind::Num(n), tok.loc)),
+            // | "(", EXPR3, ")" ;
+            TokenKind::LParen => {
+                let e = parse_expr(tokens)?;
+                match tokens.next() {
+                    Some(Token {
+                        value: TokenKind::RParen,
+                        ..
+                    }) => Ok(e),
+                    Some(t) => Err(ParseError::ReduntExpressiont(t)),
+                    _ => Err(ParseError::UnclosedOpenParen(tok)),
+                }
+            }
+            _ => Err(ParseError::NotExpressiont(tok)),
+        })
 }
 
 use std::io;
