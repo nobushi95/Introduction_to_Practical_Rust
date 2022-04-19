@@ -588,6 +588,19 @@ impl fmt::Display for Error {
     }
 }
 
+use std::error::Error as StdError;
+impl StdError for LexError {}
+impl StdError for ParseError {}
+impl StdError for Error {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        use self::Error::*;
+        match self {
+            Lexer(lex) => Some(lex),
+            Parser(parse) => Some(parse),
+        }
+    }
+}
+
 use std::io;
 fn prompt(s: &str) -> io::Result<()> {
     use std::io::{stdout, Write};
@@ -611,7 +624,16 @@ fn main() {
             let ast = match line.parse::<Ast>() {
                 Ok(ast) => ast,
                 Err(e) => {
-                    unimplemented!()
+                    // エラーの場合、そのエラーとcauseを全部出力
+                    eprintln!("{}", e);
+                    let mut source = e.source();
+                    // sourceをすべてたどって表示する
+                    while let Some(e) = source {
+                        eprintln!("caused by {}", e);
+                        source = e.source();
+                    }
+                    // エラー表示のあとは次の入力を受け付ける
+                    continue;
                 }
             };
             println!("{:?}", ast);
