@@ -512,14 +512,16 @@ fn main() {
     use std::io::{stdin, BufRead, BufReader};
     let stdin = stdin();
     let stdin = stdin.lock();
+    let stdin = BufReader::new(stdin);
     let mut lines = stdin.lines();
 
     loop {
         prompt("> ").unwrap();
         // ユーザーの入力受付
         if let Some(Ok(line)) = lines.next() {
-            let token = lex(&line);
-            println!("{:?}", token);
+            let tokens = lex(&line).unwrap();
+            let ast = parse(tokens).unwrap();
+            println!("{:?}", ast);
         } else {
             break;
         }
