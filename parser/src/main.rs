@@ -286,13 +286,13 @@ enum ParseError {
     /// 予期しないトークン
     UnexpectedToken(Token),
     /// 式を期待したが式でないものが来た
-    NotExpressiont(Token),
+    NotExpression(Token),
     /// 演算子を期待したが演算子でないものが来た
     NotOperator(Token),
     /// カッコが閉じられていない
     UnclosedOpenParen(Token),
     /// 式の解析が終わったのにまだトークンが残っている
-    ReduntExpressiont(Token),
+    RedundantExpression(Token),
     /// パース途中で入力が終了した
     Eof,
 }
@@ -318,7 +318,7 @@ fn parse(tokens: Vec<Token>) -> Result<Ast, ParseError> {
     let mut tokens = tokens.into_iter().peekable();
     let ret = parse_expr(&mut tokens)?;
     match tokens.next() {
-        Some(tok) => Err(ParseError::ReduntExpressiont(tok)),
+        Some(tok) => Err(ParseError::RedundantExpression(tok)),
         None => Ok(ret),
     }
 }
@@ -453,11 +453,11 @@ where
                         value: TokenKind::RParen,
                         ..
                     }) => Ok(e),
-                    Some(t) => Err(ParseError::ReduntExpressiont(t)),
+                    Some(t) => Err(ParseError::RedundantExpression(t)),
                     _ => Err(ParseError::UnclosedOpenParen(tok)),
                 }
             }
-            _ => Err(ParseError::NotExpressiont(tok)),
+            _ => Err(ParseError::NotExpression(tok)),
         })
 }
 
@@ -565,14 +565,14 @@ impl fmt::Display for ParseError {
         use self::ParseError::*;
         match self {
             UnexpectedToken(tok) => write!(f, "{}: '{}' is not expected", tok.loc, tok.value),
-            NotExpressiont(tok) => write!(
+            NotExpression(tok) => write!(
                 f,
                 "{}: '{}' is not a start of expression",
                 tok.loc, tok.value
             ),
             NotOperator(tok) => write!(f, "{}: '{}' is not an operator", tok.loc, tok.value),
             UnclosedOpenParen(tok) => write!(f, "{}: '{}' is not closed", tok.loc, tok.value),
-            ReduntExpressiont(tok) => write!(
+            RedundantExpression(tok) => write!(
                 f,
                 "{}: expression after '{}' is redundant",
                 tok.loc, tok.value
@@ -615,10 +615,10 @@ impl Error {
             Parser(e) => {
                 let loc = match e {
                     P::UnexpectedToken(Token { loc, .. })
-                    | P::NotExpressiont(Token { loc, .. })
+                    | P::NotExpression(Token { loc, .. })
                     | P::NotOperator(Token { loc, .. })
                     | P::UnclosedOpenParen(Token { loc, .. }) => loc.clone(),
-                    P::ReduntExpressiont(Token { loc, .. }) => Loc(loc.0, input.len()),
+                    P::RedundantExpression(Token { loc, .. }) => Loc(loc.0, input.len()),
                     P::Eof => Loc(input.len(), input.len() + 1),
                 };
                 (e, loc)
