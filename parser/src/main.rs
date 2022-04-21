@@ -640,6 +640,22 @@ fn show_trace(e: impl StdError) {
     }
 }
 
+/// インタプリタを表すデータ型
+struct InterPreter;
+
+impl InterPreter {
+    pub fn new() -> Self {
+        InterPreter
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum InterpreterErrorKind {
+    DvisionByZero,
+}
+
+type InterpreterError = Annot<InterpreterErrorKind>;
+
 use std::io;
 fn prompt(s: &str) -> io::Result<()> {
     use std::io::{stdout, Write};
