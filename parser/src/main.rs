@@ -527,7 +527,6 @@ impl FromStr for Ast {
     }
 }
 
-use std::fmt;
 impl fmt::Display for TokenKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use self::TokenKind::*;
@@ -646,6 +645,34 @@ struct InterPreter;
 impl InterPreter {
     pub fn new() -> Self {
         InterPreter
+    }
+    pub fn eval(&mut self, expr: &Ast) -> Result<i64, InterpreterError> {
+        use self::AstKind::*;
+        match expr.value {
+            Num(n) => Ok(n as i64),
+            UniOp { ref op, ref e } => {
+                let e = self.eval(e)?;
+                Ok(self.eval_uniop(op, e))
+            }
+            BinOp {
+                ref op,
+                ref l,
+                ref r,
+            } => {
+                let l = self.eval(l)?;
+                let r = self.eval(r)?;
+                self.eval_binop(op, l, r)
+                    .map_err(|e| InterpreterError::new(e, expr.loc.clone()))
+            }
+        }
+    }
+
+    fn eval_uniop(&mut self, op: &UniOp, n: i64) -> i64 {
+        todo!()
+    }
+
+    fn eval_binop(&mut self, op: &UniOp, n: i64) -> Result<i64, InterpreterErrorKind> {
+        todo!()
     }
 }
 
