@@ -736,6 +736,9 @@ fn prompt(s: &str) -> io::Result<()> {
 
 fn main() {
     use std::io::{stdin, BufRead, BufReader};
+
+    let mut interp = InterPreter::new();
+
     let stdin = stdin();
     let stdin = stdin.lock();
     let stdin = BufReader::new(stdin);
@@ -754,7 +757,15 @@ fn main() {
                     continue;
                 }
             };
-            println!("{:?}", ast);
+            let n = match interp.eval(&ast) {
+                Ok(n) => n,
+                Err(e) => {
+                    e.show_diagnostic(&line);
+                    show_trace(e);
+                    continue;
+                }
+            };
+            println!("{}", n);
         } else {
             break;
         }
