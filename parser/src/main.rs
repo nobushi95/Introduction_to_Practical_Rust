@@ -700,6 +700,31 @@ enum InterpreterErrorKind {
 
 type InterpreterError = Annot<InterpreterErrorKind>;
 
+impl fmt::Display for InterpreterError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::InterpreterErrorKind::*;
+        match self.value {
+            DvisionByZero => write!(f, "division by zero"),
+        }
+    }
+}
+
+impl StdError for InterpreterError {
+    fn description(&self) -> &str {
+        use self::InterpreterErrorKind::*;
+        match self.value {
+            DvisionByZero => "the right hand expression of the division evaluates to zero",
+        }
+    }
+}
+
+impl InterpreterError {
+    fn show_diagnostic(&self, input: &str) {
+        eprintln!("{}", self);
+        print_annot(input, self.loc.clone());
+    }
+}
+
 use std::io;
 fn prompt(s: &str) -> io::Result<()> {
     use std::io::{stdout, Write};
