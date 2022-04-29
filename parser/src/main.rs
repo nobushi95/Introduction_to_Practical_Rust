@@ -669,7 +669,11 @@ impl InterPreter {
     }
 
     fn eval_uniop(&mut self, op: &UniOp, n: i64) -> i64 {
-        todo!()
+        use self::UniOpKind::*;
+        match op.value {
+            Plus => n,
+            Minus => -n,
+        }
     }
 
     fn eval_binop(&mut self, op: &BinOp, l: i64, r: i64) -> Result<i64, InterpreterErrorKind> {
