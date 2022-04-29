@@ -527,6 +527,7 @@ impl FromStr for Ast {
     }
 }
 
+use std::fmt;
 impl fmt::Display for TokenKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use self::TokenKind::*;
@@ -671,7 +672,7 @@ impl InterPreter {
         todo!()
     }
 
-    fn eval_binop(&mut self, op: &UniOp, n: i64) -> Result<i64, InterpreterErrorKind> {
+    fn eval_binop(&mut self, op: &BinOp, l: i64, r: i64) -> Result<i64, InterpreterErrorKind> {
         todo!()
     }
 }
