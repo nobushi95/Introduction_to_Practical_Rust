@@ -677,7 +677,19 @@ impl InterPreter {
     }
 
     fn eval_binop(&mut self, op: &BinOp, l: i64, r: i64) -> Result<i64, InterpreterErrorKind> {
-        todo!()
+        use self::BinOpKind::*;
+        match op.value {
+            Add => Ok(l + r),
+            Sub => Ok(l - r),
+            Mult => Ok(l * r),
+            Div => {
+                if r == 0 {
+                    Err(InterpreterErrorKind::DvisionByZero)
+                } else {
+                    Ok(l / r)
+                }
+            }
+        }
     }
 }
 
