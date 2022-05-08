@@ -39,6 +39,8 @@ pub mod logs {
         use crate::{DateTimeRange, Log};
         use serde_derive::*;
 
+        pub type Query = DateTimeRange;
+
         #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, Deserialize, Serialize)]
         // 保存しているログをすべて返す
         pub struct Response(pub Vec<Log>);
